@@ -5,10 +5,10 @@ import io
 # Phrase that identifies pages to remove
 TEXT_TO_REMOVE = "THERE HAS NOT BEEN ANY ACTIVITY FOR THIS ACCOUNT DURING THIS FISCAL YEAR"
 
-st.title("PDF Page Filter")
+st.title("Reconciliation Page Sorter")
 
 st.write(
-    "Upload a PDF. Pages containing the target phrase will be removed automatically."
+    "Upload a reconciliation report. Unneeded pages will be removed automatically."
 )
 
 # Upload PDF
@@ -19,7 +19,7 @@ uploaded_file = st.file_uploader(
 
 # User chooses output filename
 output_name = st.text_input(
-    "Name for filtered PDF",
+    "Name for new file",
     value="filtered_file"
 )
 
