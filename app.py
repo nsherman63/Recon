@@ -2,28 +2,31 @@ import streamlit as st
 from pypdf import PdfReader, PdfWriter
 import io
 
-# Phrase that identifies pages to remove
 TEXT_TO_REMOVE = "THERE HAS NOT BEEN ANY ACTIVITY FOR THIS ACCOUNT DURING THIS FISCAL YEAR"
 
 st.title("Reconciliation Page Sorter")
 
-st.write(
-    "Upload a reconciliation report. Unneeded pages will be removed automatically."
-)
+st.write("Upload a reconciliation report, name the output file, then click Start.")
 
 # Upload PDF
-uploaded_file = st.file_uploader(
-    "Upload PDF",
-    type="pdf"
-)
+uploaded_file = st.file_uploader("Upload PDF", type="pdf")
 
-# User chooses output filename
-output_name = st.text_input(
-    "Name for new file",
-    value="filtered_file"
-)
+# Output name
+output_name = st.text_input("Name for new file", value="filtered_file")
 
-if uploaded_file is not None and output_name:
+# START BUTTON
+start = st.button("Start Processing")
+
+# Only run AFTER button press
+if start:
+
+    if uploaded_file is None:
+        st.error("Please upload a PDF first.")
+        st.stop()
+
+    if not output_name:
+        st.error("Please enter a file name.")
+        st.stop()
 
     reader = PdfReader(uploaded_file)
 
@@ -37,13 +40,11 @@ if uploaded_file is not None and output_name:
 
         text = page.extract_text()
 
-        # Keep pages with no text
         if text is None:
             kept_writer.add_page(page)
             kept_count += 1
             continue
 
-        # Remove matching pages
         if TEXT_TO_REMOVE.lower() in text.lower():
             deleted_writer.add_page(page)
             deleted_count += 1
@@ -51,7 +52,6 @@ if uploaded_file is not None and output_name:
             kept_writer.add_page(page)
             kept_count += 1
 
-    # Save PDFs into memory
     kept_buffer = io.BytesIO()
     deleted_buffer = io.BytesIO()
 
@@ -63,15 +63,13 @@ if uploaded_file is not None and output_name:
     st.write(f"Pages kept: {kept_count}")
     st.write(f"Pages removed: {deleted_count}")
 
-    # Download filtered PDF
     st.download_button(
-        label="Download Filtered PDF",
+        label="Download Sorted PDF",
         data=kept_buffer.getvalue(),
         file_name=f"{output_name}.pdf",
         mime="application/pdf"
     )
 
-    # Download removed pages PDF
     st.download_button(
         label="Download Deleted Pages PDF",
         data=deleted_buffer.getvalue(),
